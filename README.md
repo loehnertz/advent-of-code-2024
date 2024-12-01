@@ -20,4 +20,4 @@ Your instincts tell you that in order to save Christmas, you'll need to get all 
 
 | Day                       | Part 1 | Part 2 |
 |---------------------------|--------|--------|
-| Day 1: Historian Hysteria |        |        |
+| Day 1: Historian Hysteria | ⭐️     | ⭐️     |

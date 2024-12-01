@@ -26,7 +26,7 @@ abstract class Solution {
     private fun getClassName(): String = this::class.simpleName.toString()
 
     companion object {
-        const val INPUT_PATH = "app/src/main/resources/inputs"
+        const val INPUT_PATH = "aoc/src/main/resources/inputs"
         const val INPUT_FILE_EXTENSION = "txt"
     }
 }

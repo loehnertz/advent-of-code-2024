@@ -7,7 +7,7 @@ fun String.splitByLines(): List<String> = split("\n")
 
 fun String.splitByCharacter(): List<Char> = split("").filterNot { it.isBlank() }.map { it.toSingleChar() }
 
-fun String.splitBySpace(): List<String> = split(" ")
+fun String.splitBySpace(): List<String> = split(" ").filterNot { it.isBlank() }
 
 fun Int.isEven(): Boolean = this % 2 == 0
 
