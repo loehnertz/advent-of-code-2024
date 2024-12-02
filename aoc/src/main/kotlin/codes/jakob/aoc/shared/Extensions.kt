@@ -180,6 +180,21 @@ fun <E> Collection<E>.containsTimes(e: E, times: Int): Boolean = count { it == e
 
 fun <T> Iterable<T>.notAll(block: (T) -> Boolean): Boolean = !all(block)
 
+fun <T> Iterable<T>.allButAtMost(atMost: Int, predicate: (T) -> Boolean): Boolean {
+    if (this is Collection && isEmpty()) return true
+
+    var wrongCounter = 0
+    for (element in this) {
+        if (!predicate(element)) {
+            if (++wrongCounter > atMost) {
+                return false
+            }
+        }
+    }
+
+    return true
+}
+
 fun Collection<Number>.lowestCommonMultiple(): Long {
     /**
      * Calculates the "lowest common multiple" of two numbers.
