@@ -58,8 +58,8 @@ object Day02 : Solution() {
     }
 
     private fun Report.isSafeWithTolerance(): Boolean {
-        fun removeLevelAtEachIndex(): List<Report> {
-            return levels.indices.map { index ->
+        fun removeLevelAtEachIndex(): Sequence<Report> {
+            return levels.indices.asSequence().map { index ->
                 levels.toMutableList().apply { removeAt(index) }.toList().let { Report(it) }
             }
         }
