@@ -49,6 +49,10 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
         })
     }
 
+    fun filter(block: (Cell<T>) -> Boolean): List<Cell<T>> {
+        return cells.filter(block)
+    }
+
     /**
      * Reduces the grid in the given direction.
      * The outer reduction is applied to each row/column of the grid in the chosen direction.
