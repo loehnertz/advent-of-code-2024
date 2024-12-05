@@ -5,8 +5,8 @@ import codes.jakob.aoc.shared.*
 object Day05 : Solution() {
     override fun solvePart1(input: String): Any {
         val (rules: List<Rule>, updates: List<Update>) = parseInput(input)
-        val findValidUpdates: List<Update> = RuleSolver(rules, updates).findValidUpdates()
-        return sumUpdatePages(findValidUpdates)
+        val validUpdates: List<Update> = RuleSolver(rules, updates).findValidUpdates()
+        return sumUpdatePages(validUpdates)
     }
 
     override fun solvePart2(input: String): Any {
@@ -14,23 +14,27 @@ object Day05 : Solution() {
         val ruleSolver = RuleSolver(rules, updates)
         val invalidUpdates: List<Update> = updates - ruleSolver.findValidUpdates().toSet()
         val validatedUpdates: List<Update> = invalidUpdates.map { update ->
-            fun tryToValidate(update: Update): Update {
-                return update.pagesNumbers.fold(update) { toBeSortedUpdate, pageNumber ->
-                    ruleSolver.doesNotAdheresToRules(toBeSortedUpdate, pageNumber)
-                        .fold(toBeSortedUpdate) { update, rule ->
-                            val pageNumbers = update.pagesNumbers.toMutableList()
-                            pageNumbers.remove(rule.pageB)
-                            pageNumbers.addLast(rule.pageB)
-                            Update(pageNumbers)
+            tailrec fun validate(update: Update): Update {
+                fun tryToValidate(update: Update): Update {
+                    return update.pagesNumbers
+                        .fold(update) { toBeSortedUpdate, pageNumber ->
+                            ruleSolver.doesNotAdheresToRules(toBeSortedUpdate, pageNumber)
+                                .fold(toBeSortedUpdate) { update, rule ->
+                                    update.pagesNumbers.toMutableList().apply {
+                                        this[update.indexOf(rule.pageA)] = rule.pageB
+                                        this[update.indexOf(rule.pageB)] = rule.pageA
+                                    }.let { Update(it) }
+                                }
                         }
                 }
+
+                val maybeValidatedUpdate = tryToValidate(update)
+                return if (ruleSolver.isValidUpdate(maybeValidatedUpdate)) {
+                    maybeValidatedUpdate
+                } else validate(maybeValidatedUpdate)
             }
 
-            var maybeValidatedUpdate = tryToValidate(update)
-            while (!ruleSolver.isValidUpdate(maybeValidatedUpdate)) {
-                maybeValidatedUpdate = tryToValidate(maybeValidatedUpdate)
-            }
-            maybeValidatedUpdate
+            validate(update)
         }
         return sumUpdatePages(validatedUpdates)
     }
