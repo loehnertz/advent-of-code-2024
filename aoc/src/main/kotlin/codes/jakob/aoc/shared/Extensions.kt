@@ -5,6 +5,10 @@ import java.util.*
 
 fun String.splitByLines(): List<String> = split("\n")
 
+fun String.splitByDoubleNewLine(): Pair<String, String> = split("\n\n").toPair()
+
+fun String.splitByComma(): List<String> = split(",")
+
 fun String.splitByCharacter(): List<Char> = split("").filterNot { it.isBlank() }.map { it.toSingleChar() }
 
 fun String.splitBySpace(): List<String> = split(" ").filterNot { it.isBlank() }
