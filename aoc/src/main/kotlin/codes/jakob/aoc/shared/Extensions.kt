@@ -3,11 +3,11 @@ package codes.jakob.aoc.shared
 import java.util.*
 
 
-fun String.splitByLines(): List<String> = split("\n")
+fun String.splitByLines(): List<String> = split("\n").filterNot { it.isBlank() }
 
-fun String.splitByDoubleNewLine(): Pair<String, String> = split("\n\n").toPair()
+fun String.splitByDoubleNewLine(): Pair<String, String> = split("\n\n").filterNot { it.isBlank() }.toPair()
 
-fun String.splitByComma(): List<String> = split(",")
+fun String.splitByComma(): List<String> = split(",").filterNot { it.isBlank() }
 
 fun String.splitByCharacter(): List<Char> = split("").filterNot { it.isBlank() }.map { it.toSingleChar() }
 
@@ -64,6 +64,10 @@ fun <E> Stack<E>.peekOrNull(): E? {
 
 fun <E> List<E>.associateByIndex(): Map<Int, E> {
     return this.mapIndexed { index, element -> index to element }.toMap()
+}
+
+fun <E> List<E>.takeAndDrop(amount: Int): Pair<List<E>, List<E>> {
+    return take(amount) to drop(amount)
 }
 
 private val NUMBER_PATTERN = Regex("\\d+")
@@ -162,7 +166,7 @@ fun Iterable<Long>.multiply(): Long = fold(1L) { a, l -> a * l }
 fun Char.parseInt(): Int = toString().toInt()
 
 fun <T> String.parseMatrix(block: (Char) -> T): List<List<T>> {
-    return this.splitByLines().map { it.splitByCharacter().map(block) }
+    return this.splitByLines().filterNot { it.isBlank() }.map { it.splitByCharacter().map(block) }
 }
 
 fun <T> String.parseGrid(block: (Char) -> T): Grid<T> {

@@ -21,7 +21,7 @@ object Day02 : Solution() {
             .map { line -> line.splitBySpace().map { Report.Level(it.toInt()) }.let { Report(it) } }
     }
 
-    data class Report(
+    private data class Report(
         val levels: List<Level>
     ) {
         fun calculateDirectionChanges(): List<Pair<ChangeDirection, Int>>? {
