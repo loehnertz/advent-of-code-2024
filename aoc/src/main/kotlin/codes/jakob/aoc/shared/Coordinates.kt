@@ -43,14 +43,14 @@ data class Coordinates(
      */
     fun inDirection(direction: ExpandedDirection, distance: Int = 1): Coordinates {
         return when (direction) {
-            NORTH -> Coordinates(x, y + distance)
-            NORTH_EAST -> Coordinates(x + distance, y + distance)
+            NORTH -> Coordinates(x, y - distance)
+            NORTH_EAST -> Coordinates(x + distance, y - distance)
             EAST -> Coordinates(x + distance, y)
-            SOUTH_EAST -> Coordinates(x + distance, y - distance)
-            SOUTH -> Coordinates(x, y - distance)
-            SOUTH_WEST -> Coordinates(x - distance, y - distance)
+            SOUTH_EAST -> Coordinates(x + distance, y + distance)
+            SOUTH -> Coordinates(x, y + distance)
+            SOUTH_WEST -> Coordinates(x - distance, y + distance)
             WEST -> Coordinates(x - distance, y)
-            NORTH_WEST -> Coordinates(x - distance, y + distance)
+            NORTH_WEST -> Coordinates(x - distance, y - distance)
         }
     }
 
@@ -85,5 +85,23 @@ data class Coordinates(
             }
         }
         return null
+    }
+
+    infix fun howToReach(other: Coordinates): List<ExpandedDirection> {
+        val xDifference: Int = other.x - x
+        val yDifference: Int = other.y - y
+        val xDirection: ExpandedDirection = if (xDifference > 0) EAST else WEST
+        val yDirection: ExpandedDirection = if (yDifference > 0) SOUTH else NORTH
+        val xSteps: Int = abs(xDifference)
+        val ySteps: Int = abs(yDifference)
+        val xDirections: List<ExpandedDirection> = List(xSteps) { xDirection }
+        val yDirections: List<ExpandedDirection> = List(ySteps) { yDirection }
+        return xDirections + yDirections
+    }
+
+    fun walk(steps: List<ExpandedDirection>): Coordinates {
+        return steps.fold(this) { accumulator, direction ->
+            accumulator.inDirection(direction)
+        }
     }
 }

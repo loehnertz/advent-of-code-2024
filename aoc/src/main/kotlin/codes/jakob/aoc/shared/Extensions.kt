@@ -37,13 +37,6 @@ fun CharSequence.toSingleChar(): Char {
     return this.first()
 }
 
-operator fun <T> T.plus(collection: Collection<T>): List<T> {
-    val result = ArrayList<T>(collection.size + 1)
-    result.add(this)
-    result.addAll(collection)
-    return result
-}
-
 fun <T, K> Collection<T>.countBy(keySelector: (T) -> K): Map<K, Int> {
     return this.groupingBy(keySelector).eachCount()
 }
@@ -155,8 +148,16 @@ fun <T, R> Collection<T>.allUnique(block: (T) -> R): Boolean {
     return mapped.size == mapped.toSet().size
 }
 
-fun <E> Collection<E>.cartesianProduct(): List<Pair<E, E>> {
-    return this.flatMap { lhs: E -> this.map { rhs: E -> lhs to rhs } }
+fun <E> Collection<E>.cartesianProduct(bothDirections: Boolean = true, includeReflexive: Boolean = true): List<Pair<E, E>> {
+    return this.flatMap { lhs: E ->
+        this.mapNotNull { rhs: E ->
+            when {
+                !includeReflexive && lhs == rhs -> null
+                bothDirections || lhs.hashCode() <= rhs.hashCode() -> lhs to rhs
+                else -> null
+            }
+        }
+    }
 }
 
 fun Iterable<Int>.multiply(): Int = fold(1) { a, i -> a * i }

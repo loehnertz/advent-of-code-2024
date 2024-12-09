@@ -53,6 +53,10 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
         return cells.filter(block)
     }
 
+    fun find(block: (Cell<T>) -> Boolean): Cell<T>? {
+        return cells.find(block)
+    }
+
     /**
      * Reduces the grid in the given direction.
      * The outer reduction is applied to each row/column of the grid in the chosen direction.
@@ -78,6 +82,21 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
             SimpleDirection.WEST -> matrix
         }
         return inner(matrixInDirection.map(outer))
+    }
+
+    operator fun contains(coordinates: Coordinates): Boolean = getAtCoordinates(coordinates) != null
+
+    fun replaceCell(coordinates: Coordinates, newContent: (Cell<T>) -> T): Grid<T> {
+        val cell: Cell<T> = getAtCoordinates(coordinates) ?: error("Coordinates do not exist in this grid")
+
+        val newCell: Cell<T> = Cell(this, cell.coordinates, newContent)
+        val newMatrix: MutableList<List<Cell<T>>> = matrix.toMutableList()
+        val newRow: MutableList<Cell<T>> = newMatrix[cell.coordinates.y].toMutableList()
+
+        newMatrix[cell.coordinates.y] = newRow
+        newRow[cell.coordinates.x] = newCell
+        
+        return Grid(newMatrix.map { it.map { cell -> { cell.content.value } } })
     }
 
     private fun generateMatrix(input: List<List<(Cell<T>) -> T>>): List<List<Cell<T>>> {
@@ -109,6 +128,10 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
         fun distanceTo(other: Cell<T>, diagonally: Boolean = false): Int {
             require(other in grid.cells) { "Start and end point are not in the same grid" }
             return this.coordinates.distanceTo(other.coordinates, diagonally)
+        }
+
+        fun getInDirection(direction: SimpleDirection): Cell<T>? {
+            return getInDirection(direction.expanded)
         }
 
         fun getInDirection(direction: ExpandedDirection): Cell<T>? {

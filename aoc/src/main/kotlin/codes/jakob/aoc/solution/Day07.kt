@@ -1,6 +1,5 @@
 package codes.jakob.aoc.solution
 
-import codes.jakob.aoc.shared.plus
 import codes.jakob.aoc.shared.splitByLines
 import codes.jakob.aoc.shared.takeAndDrop
 import codes.jakob.aoc.solution.Day07.Operation.*
@@ -25,7 +24,7 @@ object Day07 : Solution() {
 
             for (operation: Operation in operations) {
                 val result: Long = operation.evaluate(leftValue, rightValue)
-                if (fold(result + remainingValues, targetValue, operations)) {
+                if (fold(remainingValues.plus(result), targetValue, operations)) {
                     return true
                 }
             }
