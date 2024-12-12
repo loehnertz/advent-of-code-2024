@@ -63,6 +63,12 @@ fun <E> List<E>.takeAndDrop(amount: Int): Pair<List<E>, List<E>> {
     return take(amount) to drop(amount)
 }
 
+fun <E> MutableList<E>.swap(indexA: Int, indexB: Int) {
+    val valueA: E = this[indexA]
+    this[indexA] = this[indexB]
+    this[indexB] = valueA
+}
+
 private val NUMBER_PATTERN = Regex("\\d+")
 fun String.isNumber(): Boolean = NUMBER_PATTERN.matches(this)
 
