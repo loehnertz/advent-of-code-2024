@@ -9,6 +9,32 @@ enum class SimpleDirection(val expanded: ExpandedDirection) {
     SOUTH(ExpandedDirection.SOUTH),
     WEST(ExpandedDirection.WEST);
 
+    fun turn(turnDirection: TurnDirection): SimpleDirection {
+        return when (this) {
+            NORTH -> when (turnDirection) {
+                TurnDirection.LEFT -> WEST
+                TurnDirection.RIGHT -> EAST
+            }
+            EAST -> when (turnDirection) {
+                TurnDirection.LEFT -> NORTH
+                TurnDirection.RIGHT -> SOUTH
+            }
+            SOUTH -> when (turnDirection) {
+                TurnDirection.LEFT -> EAST
+                TurnDirection.RIGHT -> WEST
+            }
+            WEST -> when (turnDirection) {
+                TurnDirection.LEFT -> SOUTH
+                TurnDirection.RIGHT -> NORTH
+            }
+        }
+    }
+    
+    enum class TurnDirection {
+        LEFT,
+        RIGHT
+    }
+
     companion object {
         fun fromExpandedDirection(expandedDirection: ExpandedDirection): SimpleDirection {
             return entries.first { it.expanded == expandedDirection }
