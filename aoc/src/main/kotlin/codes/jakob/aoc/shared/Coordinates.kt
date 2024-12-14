@@ -11,6 +11,21 @@ data class Coordinates(
     val x: Int,
     val y: Int,
 ) {
+    operator fun plus(velocity: Coordinates): Coordinates {
+        return Coordinates(x + velocity.x, y + velocity.y)
+    }
+
+    fun plus(velocity: Coordinates, grid: Grid<*>, wrapAround: Boolean = false): Coordinates? {
+        val newCoordinates: Coordinates = this + velocity
+        return if (!wrapAround) {
+            if (newCoordinates in grid) newCoordinates else null
+        } else {
+            val x: Int = if (newCoordinates.x < 0) grid.width + newCoordinates.x else newCoordinates.x % grid.width
+            val y: Int = if (newCoordinates.y < 0) grid.height + newCoordinates.y else newCoordinates.y % grid.height
+            Coordinates(x, y)
+        }
+    }
+
     /**
      * Calculates the distance between two coordinates.
      */

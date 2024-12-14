@@ -12,14 +12,21 @@ import codes.jakob.aoc.shared.ExpandedDirection.*
  * @param T The type of the value of each cell
  */
 @Suppress("MemberVisibilityCanBePrivate")
-class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
+class Grid<T>(input: List<List<(Cell<T>) -> T>>, private val eager: Boolean = false) {
     constructor(
         coordinateValues: Map<Coordinates, (Cell<T>) -> T>,
         defaultValueConstructor: (Cell<T>) -> T,
-    ) : this(fromCoordinatesValues(coordinateValues, defaultValueConstructor))
+        eager: Boolean = false,
+    ) : this(fromCoordinatesValues(coordinateValues, defaultValueConstructor), eager)
 
     val matrix: Matrix<T> = generateMatrix(input)
     val cells: LinkedHashSet<Cell<T>> = LinkedHashSet(matrix.flatten())
+    val height: Int = matrix.size
+    val width: Int = matrix.firstOrNull()?.size ?: 0
+
+    operator fun get(coordinates: Coordinates): Cell<T>? = getAtCoordinates(coordinates)
+
+    operator fun contains(coordinates: Coordinates): Boolean = this[coordinates] != null
 
     fun getAtCoordinates(coordinates: Coordinates): Cell<T>? = matrix.getOrNull(coordinates.y)?.getOrNull(coordinates.x)
 
@@ -84,7 +91,39 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
         return inner(matrixInDirection.map(outer))
     }
 
-    operator fun contains(coordinates: Coordinates): Boolean = getAtCoordinates(coordinates) != null
+    /**
+     * Splits into many grids of the same size that are `1/parts` of the original grid.
+     * If a cell is not evenly divisible by the number of parts, it will be excluded from the split.
+     */
+    fun split(parts: Int): List<Grid<T>> {
+        val partWidth: Int = width / (parts / 2)
+        val partHeight: Int = height / (parts / 2)
+
+        val grids: MutableList<Grid<T>> = mutableListOf()
+        var startX = 0
+        var startY = 0
+        var endX = partWidth
+        var endY = partHeight
+        for (part in 0 until parts) {
+            val partMatrix: List<List<T>> =
+                matrix.subList(startY, endY)
+                    .map { row -> row.subList(startX, endX) }
+                    .map { row -> row.map { cell -> cell.content.value } }
+            grids += fromMatrix(partMatrix, eager)
+
+            if (part.isEven()) {
+                startX = endX + (if (width.isOdd()) 1 else 0)
+                endX += partWidth + 1
+            } else {
+                startX = 0
+                endX = partWidth
+                startY = endY + (if (height.isOdd()) 1 else 0)
+                endY += partHeight + 1
+            }
+        }
+
+        return grids
+    }
 
     fun replaceCell(coordinates: Coordinates, newContent: (Cell<T>) -> T): Grid<T> {
         val cell: Cell<T> = getAtCoordinates(coordinates) ?: error("Coordinates do not exist in this grid")
@@ -95,14 +134,16 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
 
         newMatrix[cell.coordinates.y] = newRow
         newRow[cell.coordinates.x] = newCell
-        
+
         return Grid(newMatrix.map { it.map { cell -> { cell.content.value } } })
     }
 
     private fun generateMatrix(input: List<List<(Cell<T>) -> T>>): List<List<Cell<T>>> {
         return input.mapIndexed { y: Int, row: List<(Cell<T>) -> T> ->
             row.mapIndexed { x: Int, valueConstructor: (Cell<T>) -> T ->
-                Cell(this, x, y, valueConstructor)
+                Cell(this, x, y, valueConstructor).apply {
+                    if (eager) content.value
+                }
             }
         }
     }
@@ -205,11 +246,11 @@ class Grid<T>(input: List<List<(Cell<T>) -> T>>) {
     }
 
     companion object {
-        fun <T> fromMatrix(matrix: List<List<T>>): Grid<T> {
-            return Grid(matrix.map { inner -> inner.map { value -> { value } } })
+        fun <T> fromMatrix(matrix: List<List<T>>, eager: Boolean = false): Grid<T> {
+            return Grid(matrix.map { inner -> inner.map { value -> { value } } }, eager)
         }
 
-        fun <T> fromCoordinatesValues(
+        private fun <T> fromCoordinatesValues(
             coordinateValues: Map<Coordinates, (Cell<T>) -> T>,
             defaultValueConstructor: (Cell<T>) -> T,
         ): List<List<(Cell<T>) -> T>> {
