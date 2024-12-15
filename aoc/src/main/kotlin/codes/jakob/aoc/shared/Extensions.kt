@@ -1,5 +1,6 @@
 package codes.jakob.aoc.shared
 
+import java.math.BigInteger
 import java.util.*
 
 
@@ -11,7 +12,7 @@ fun String.splitByComma(): List<String> = split(",").filterNot { it.isBlank() }
 
 fun String.splitByCharacter(): List<Char> = split("").filterNot { it.isBlank() }.map { it.toSingleChar() }
 
-fun String.splitBySpace(): List<String> = split(" ").filterNot { it.isBlank() }
+fun String.splitBySpace(): List<String> = replace("\n", "").split(" ").filterNot { it.isBlank() }
 
 fun Int.isEven(): Boolean = this % 2 == 0
 
@@ -19,6 +20,12 @@ fun Int.isOdd(): Boolean = !isEven()
 
 fun <E> List<E>.middleOrNull(): E? {
     return if (this.count().isOdd()) this[this.count() / 2] else null
+}
+
+fun <E> List<E>.remap(times: Int, block: (List<E>) -> List<E>): List<E> {
+    var result: List<E> = this
+    repeat(times) { result = block(result) }
+    return result
 }
 
 fun <T> Iterable<T>.productOf(selector: (T) -> Int): Int {
@@ -49,6 +56,12 @@ fun <K, V> Map<K, V>.reversed(): Map<V, K> {
     return HashMap<V, K>(this.count()).also { reversedMap: HashMap<V, K> ->
         this.entries.forEach { reversedMap[it.value] = it.key }
     }
+}
+
+fun <K, V> Map<K, V>.remap(times: Int, block: (Map<K, V>) -> Map<K, V>): Map<K, V> {
+    var result: Map<K, V> = this
+    repeat(times) { result = block(result) }
+    return result
 }
 
 fun <E> Stack<E>.peekOrNull(): E? {
@@ -83,6 +96,10 @@ fun <K, V, NK> Map<K, V>.mapKeysMergingValues(
         .mapValues { (_, values) -> values.reduce(mergeValues) }
 }
 
+fun <A> Pair<A, A>.toSet(): Set<A> {
+    return setOf(this.first, this.second)
+}
+
 inline fun <T, R> Pair<T, T>.map(block: (T) -> R): Pair<R, R> {
     return this.let { (first: T, second: T) ->
         block(first) to block(second)
@@ -102,6 +119,10 @@ fun <E> List<E>.splitInHalf(): Pair<List<E>, List<E>> {
 fun List<Int>.binaryToDecimal(): Int {
     require(this.all { it == 0 || it == 1 }) { "Expected bit string, but received $this" }
     return Integer.parseInt(this.joinToString(""), 2)
+}
+
+fun Collection<BigInteger>.sum(): BigInteger {
+    return this.reduce { accumulator, element -> accumulator + element }
 }
 
 fun Int.bitFlip(): Int {
@@ -154,7 +175,10 @@ fun <T, R> Collection<T>.allUnique(block: (T) -> R): Boolean {
     return mapped.size == mapped.toSet().size
 }
 
-fun <E> Collection<E>.cartesianProduct(bothDirections: Boolean = true, includeReflexive: Boolean = true): List<Pair<E, E>> {
+fun <E> Collection<E>.cartesianProduct(
+    bothDirections: Boolean = true,
+    includeReflexive: Boolean = true
+): List<Pair<E, E>> {
     return this.flatMap { lhs: E ->
         this.mapNotNull { rhs: E ->
             when {
